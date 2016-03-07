@@ -6,11 +6,13 @@ import java.net.ServerSocket;
 
 import java.io.*;
 import java.net.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 public class ProxyServer
 {
-    public static void main(String[] args) throws IOException
+    public static void main(String[] args)
     {
         ServerSocket sock = null;
         boolean running = true;
@@ -29,8 +31,16 @@ public class ProxyServer
 
         while(running)
         {
-            new ProxyThread(sock.accept()).start();
+            try {
+                new ProxyThread(sock.accept()).start();
+            } catch (IOException ex) {
+                Logger.getLogger(ProxyServer.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
-        sock.close();
+        try {
+            sock.close();
+        } catch (IOException ex) {
+            Logger.getLogger(ProxyServer.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 }

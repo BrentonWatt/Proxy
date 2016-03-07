@@ -29,6 +29,7 @@ public class ProxyThread extends Thread
             String URLCALL = "";
             while((inputLine = inCli.readLine())!=null)
             {
+                //System.out.println(inputLine);
                 try
                 {
                     StringTokenizer tokenizer = new StringTokenizer(inputLine);
@@ -42,7 +43,7 @@ public class ProxyThread extends Thread
                 {
                     String[] tokens = inputLine.split(" ");
                     URLCALL = tokens[1];
-                    System.out.println("Request for: " + URLCALL);
+                    System.out.println(sock.getInetAddress() + ": Request for: " + URLCALL);
                 }
                 count++;
             }
@@ -54,24 +55,25 @@ public class ProxyThread extends Thread
                 connection.setDoOutput(false);
                 InputStream inStream = null;
                 HttpURLConnection hucc = (HttpURLConnection) connection;
-                    try
-                    {
-                        inStream = hucc.getInputStream();
-                        reader = new BufferedReader(new InputStreamReader(inStream));
-                    } catch (IOException ie) {
-                        System.out.println("IO error");
+                try
+                {
+                    inStream = hucc.getInputStream();
+                    reader = new BufferedReader(new InputStreamReader(inStream));
+                    byte b[] = new byte[BUFFER];
+                    int index = inStream.read(b, 0, BUFFER);
+                    while (index != -1) {
+                        out.write(b, 0, index);
+                        index = inStream.read(b, 0, BUFFER);
                     }
-                byte b[] = new byte[BUFFER];
-                int index = inStream.read(b, 0, BUFFER);
-                while (index != -1) {
-                    out.write(b, 0, index);
-                    index = inStream.read(b, 0, BUFFER);
+                    out.flush();
+                } catch (IOException ie) {
+                    System.out.println("IO error: " + ie);
                 }
-                out.flush();
+                
             }
             catch(Exception e)
             {
-                System.out.println("Shit went wrong");
+                System.out.println("Unknown Error: " + e);
             }
 
             if(reader != null)
@@ -93,7 +95,7 @@ public class ProxyThread extends Thread
         }
         catch(Exception e)
         {
-            System.out.println("Exception");
+            System.out.println("Exception: " + e);
         }
     }
 }
